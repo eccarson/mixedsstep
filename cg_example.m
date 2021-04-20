@@ -18,7 +18,7 @@ b = V*ones(size(A,1),1);
 b = b./norm(b);
 
 % Set value of s to use
-s = 5;
+s = 6;
 
 
 % Set the type of polynomial basis you would like to use; options are
@@ -26,7 +26,7 @@ s = 5;
 basis_info.type='monomial';
 
 % Set the maximum number of iterations to run
-options.xlim = 700;
+options.xlim = 900;
 
 % Set the name of the matrix; this is for naming the output files
 options.name='strakos';
