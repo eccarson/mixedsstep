@@ -31,10 +31,10 @@ V(:,1) = v0;
 
 % Construct the remaining basis vectors iteratively
 if(s>1)
-    V(:,2) = (A-alp(1).*eye(n))*V(:,1)./gam(1);   
+    V(:,2) = (A-alp(1).*speye(n))*V(:,1)./gam(1);   
     if(s>2)
         for qq = 2:(s-1)            
-            V(:,qq+1) = ((A-alp(qq).*eye(n))*V(:,qq) - bet(qq-1)*V(:,qq-1))./gam(qq);          
+            V(:,qq+1) = ((A-alp(qq).*speye(n))*V(:,qq) - bet(qq-1)*V(:,qq-1))./gam(qq);          
         end
     end
 end

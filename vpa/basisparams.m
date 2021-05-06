@@ -21,15 +21,16 @@ function [alp,bet,gam, T] = basisparams(s, A, basis_info)
 
 if(strcmp(basis_info.type, 'newton'))
     
-    % Obtain extremal eigenvalues of A. Note that by commenting out 'eig' and
-    % uncommenting the lines that use 'eigs', the basis can be generated using only
-    % estimates of extremal eigenvalues (although need to set an appropriate
-    % number of iterations). Has not been thoroughly tested.
-    ee = eig(full(A));
+    % Obtain extremal eigenvalues of A. In case the matrix is large (the
+    % threshold of 600 can be changed), use only 4s eigenvalue estimates
+    % rather than compute whole spectrum. 
+    if(size(A,2) < 600)
+        ee = eig(full(A));
+    else
+        ee = [eigs(A,2*s,'LM'),eigs(A,2*s,'SM')];
+    end
     mx = max(ee);
     mn = min(ee);
-    % mx = eigs(A,1,'LM');
-    % mn = eigs(A,1,'SM');
     
     % Don't use scaled newton polynomials; edit to change this.
     basis_info.scale = ones(s,1);
@@ -43,15 +44,16 @@ if(strcmp(basis_info.type, 'newton'))
     
 elseif(strcmp(basis_info.type, 'chebyshev'))
     
-    % Obtain extremal eigenvalues of A. Note that by commenting out 'eig' and
-    % uncommenting the lines that use 'eigs', the basis can be generated using only
-    % estimates of extremal eigenvalues (although need to set an appropriate
-    % number of iterations). Has not been thoroughly tested.
-    ee = eig(full(A));
+    % Obtain extremal eigenvalues of A. In case the matrix is large (the
+    % threshold of 600 can be changed), use only 4s eigenvalue estimates
+    % rather than compute whole spectrum. 
+    if(size(A,2) < 600)
+        ee = eig(full(A));
+    else
+        ee = [eigs(A,2*s,'LM'),eigs(A,2*s,'SM')];
+    end
     mx = max(ee);
     mn = min(ee);
-    % mx = eigs(A,1,'LM');
-    % mn = eigs(A,1,'SM');
     
     cc =(mx+mn)/2;
     aa = abs(mx-cc);
