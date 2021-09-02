@@ -1,10 +1,10 @@
 % mixed_ca_lanczos_bounds_tight.m
 % This file runs mixed precision s-step Lanczos algorithm and measures
 % quantities related to the normality, loss of orthogonality, column error,
-% and deviation of AV and T, as well as the (tight) bounds on these quantities. All
-% computations are performed in double precision except for computing and
-% applying the Gram matrix G, which is done in quadruple precision (using
-% the Advanpix toolbox). 
+% and deviation of AV and T, as well as both loose and tight bounds on these 
+% quantities. All computations are performed in double precision except 
+% for computing and applying the Gram matrix G, which is done in quadruple 
+% precision (using the Advanpix toolbox). 
 %
 % Input:
 %   A : a square, symmetric coefficient matrix
@@ -121,47 +121,27 @@ while m < options.xlim
         ucoeff(:,j+1) = T*vcoeff(:,j+1) -beta(m+1)*vcoeff(:,j);
         u(:,m+1) = (Y*ucoeff(:,j+1));
         
-%         
-%         Yw(m) = norm(abs(Y)*abs(wcoeff)) /  norm(Y*wcoeff);
-%         Yv(m) = sqrt(abs(vcoeff(:,j))'*Gabs*abs(vcoeff(:,j))) / sqrt(abs(vcoeff(:,j)'*G*vcoeff(:,j)));
-%         %Yv1(m) = (abs(vcoeff(:,j+1))'*Gabs*abs(vcoeff(:,j+1))) / (abs(vcoeff(:,j+1)'*G*vcoeff(:,j+1)));
-%         Yu(m) = sqrt(abs(ucoeff(:,j))'*Gabs*abs(ucoeff(:,j))) /  sqrt(abs(ucoeff(:,j)'*G*ucoeff(:,j)));
-%        % Yuv(m) = abs(vcoeff(:,j))'*Gabs*abs(ucoeff(:,j)) /  (abs(ucoeff(:,j)'*G*vcoeff(:,j)));
-%         YBv(m) = sqrt(abs(T)*abs(vcoeff(:,j)))'*Gabs*(abs(T)*abs(vcoeff(:,j))) /  sqrt(norm(abs(full(T)))^2*(vcoeff(:,j)'*G*vcoeff(:,j)));
-%        
-%         
-%         
-%         % Store measured quantities and their bounds
-%         if(m>1)
-%             
-%             Gamma_norm(m) = Yw(m);
-%             Gamma_orth(m) = max([Yw(m-1), Yw(m), Yv(m),Yu(m)]);
-%             
-%             Gamma_colbound(m) = max([Yw(m), Yu(m), YBv(m), Yv(m), Yv(m-1)]);
-% 
-%             Gamma_diffbound(m) = max(Gamma_diffbound(m-1), max([Yw(m), YBv(m), Yv(m), Yu(m), Yw(m-1), YBv(m-1), Yv(m-1), Yu(m-1)]));% max([Yw(m),Yv(m),Yu(m),Yuv(m),Yv(m-1)]); %
-% 
-%             
+        % Compute quantities needed for tighter bounds
         Yw(m) = (abs(wcoeff)'*Gabs*abs(wcoeff)) /  (abs(wcoeff'*G*wcoeff));
         Yv(m) = (abs(vcoeff(:,j))'*Gabs*abs(vcoeff(:,j))) / (abs(vcoeff(:,j)'*G*vcoeff(:,j)));
-        Yv1(m) = (abs(vcoeff(:,j+1))'*Gabs*abs(vcoeff(:,j+1))) / (abs(vcoeff(:,j+1)'*G*vcoeff(:,j+1)));
         Yu(m) = (abs(ucoeff(:,j))'*Gabs*abs(ucoeff(:,j))) /  (abs(ucoeff(:,j)'*G*ucoeff(:,j)));
-        Yuv(m) = abs(vcoeff(:,j))'*Gabs*abs(ucoeff(:,j)) /  (abs(ucoeff(:,j)'*G*vcoeff(:,j)));
         YBv(m) = (abs(T)*abs(vcoeff(:,j)))'*Gabs*(abs(T)*abs(vcoeff(:,j))) /  (norm(abs(full(T)))^2*(vcoeff(:,j)'*G*vcoeff(:,j)));
         
         
         % Store measured quantities and their bounds
         if(m>1)
             
+            % Compute Gamma terms for tighter bounds)
             Gamma_norm(m) = Yw(m);
             Gamma_orth(m) = max([Yw(m-1), Yw(m), Yv(m),Yu(m)]);
             Gamma_colbound(m) = max([Yw(m), Yu(m), YBv(m), Yv(m), Yv(m-1)]);
-            Gamma_diffbound(m) = max(Gamma_diffbound(m-1), max([Yw(m), YBv(m), Yv(m), Yu(m), Yw(m-1), YBv(m-1), Yv(m-1), Yu(m-1)]));
+            Gamma_diffbound(m) = max(Gamma_diffbound(m-1), max([Yw(m), YBv(m), Yv(m), Yu(m)]));
             
-            results.Gamma_norm(m)=Gamma_norm(m);
-            results.Gamma_orth(m)=Gamma_orth(m);
-            results.Gamma_colbound(m)=Gamma_colbound(m);
-            results.Gamma_diffbound(m)=Gamma_diffbound(m);
+            % Store results for plotting
+            results.Gamma_norm(m) = sqrt(Gamma_norm(m));
+            results.Gamma_orth(m) = sqrt(Gamma_orth(m));
+            results.Gamma_colbound(m) = sqrt(Gamma_colbound(m));
+            results.Gamma_diffbound(m) = sqrt(Gamma_diffbound(m));
             
             results.orthactual(m) = mp(beta(m+1),64)*abs(mp(v(:,m),64)'*mp(v(:,m+1),64));
             results.orthbound(m) =  e0*sigma;
@@ -187,6 +167,9 @@ while m < options.xlim
     % Increment outer iteration count
     k = k+1;
 end
+
+% Store tridiagonal T matrix 
+results.T = diag(alpha(1:end),0)+diag(beta(2:end-1),1)+ diag(beta(2:end-1),-1);
 
 
 end

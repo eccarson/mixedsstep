@@ -133,6 +133,9 @@ while m < options.xlim
     k = k+1;
 end
 
+% Store tridiagonal T matrix
+results.T = diag(alpha(1:end),0)+diag(beta(2:end-1),1)+ diag(beta(2:end-1),-1);
+
 
 
 end
